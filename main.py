@@ -22,7 +22,7 @@ def text_reply(msg):
 		sender = msg.user.search_member(userName=msg.fromUserName)
 		print(msg.text, sender)
 
-		if sender.NickName == "cmdr" or True:
+		if sender.NickName == "cmdr":
 			if msg.text == "开始娱乐":
 
 				if start_fun_time == None or datetime.datetime.now().day != start_fun_time.day:
