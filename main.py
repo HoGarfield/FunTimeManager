@@ -99,5 +99,5 @@ if __name__ == '__main__':
 	with open("config.json", "r", encoding="utf-8") as f:
 		config = json.load(f)
 
-	itchat.auto_login(enableCmdQR=True)
+	itchat.auto_login(enableCmdQR=2)
 	itchat.run()
