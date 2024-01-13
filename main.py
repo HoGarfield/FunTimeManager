@@ -19,7 +19,7 @@ def text_reply(msg):
 	global fun_rest_time, warning_t, start_fun_time, study_action, start_study_time
 	print(msg)
 	if msg.user.NickName == "个个都是靓仔靓女":
-		sender = msg.user.search_member(userName=msg.fromUserName)
+		sender = msg.user.search_member(userName=msg.ActualUserName)
 		print(msg.text, sender)
 
 		if sender.NickName == "cmdr":
