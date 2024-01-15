@@ -50,14 +50,14 @@ class StateBase:
 			for study_type in self.config["study"]:
 				if type(self.config["study"][study_type]) == list:
 					cmd += f"""
-					开始{study_type}
-					{study_type}赢了
-					{study_type}输了
+				开始{study_type}
+				{study_type}赢了
+				{study_type}输了
 					"""
 				else:
 					cmd += f"""
-					开始{study_type}
-					停止{study_type}
+				开始{study_type}
+				停止{study_type}
 					"""
 
 			msg.user.send_msg(cmd)
@@ -182,7 +182,7 @@ class StudyState(StateBase):
 			else:
 				self.owner.try_to(IdleState, sender, msg)
 
-		elif self.StudyType == "围棋" and ("赢了" in msg.text or "输了" in msg.text):
+		elif self.StudyType == "围棋" and ("赢了" + self.StudyType == msg.text or "输了" + self.StudyType == msg.text):
 			if "赢了" in msg.text:
 				self.Win = True
 			else:
