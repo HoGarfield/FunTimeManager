@@ -61,6 +61,13 @@ class StateBase:
 					"""
 
 			msg.user.send_msg(cmd)
+		elif sender.NickName == "何garfield" and msg.text.startswith("重置娱乐时间"):
+			try:
+				FunState.RestTime = int(msg.text.split(" ")[1]) * 60
+				FunState.StartFunTime = datetime.datetime.now()
+				msg.user.send_msg(f"重置娱乐时间成功，剩余时间为{math.floor(FunState.RestTime / 60)}分")
+			except:
+				pass
 
 
 class IdleState(StateBase):
@@ -169,17 +176,18 @@ class StudyState(StateBase):
 	def text_reply(self, sender, msg):
 		super().text_reply(sender, msg)
 
-		if self.StudyType is not None and msg.text == self.StudyType + "结束":
+		if self.StudyType is not None and msg.text == "停止" + self.StudyType:
 			if self.StudyType == "围棋":
 				msg.user.send_msg("请发送围棋赢了或者围棋输了")
 			else:
-				return True
+				self.owner.try_to(IdleState, sender, msg)
 
 		elif self.StudyType == "围棋" and ("赢了" in msg.text or "输了" in msg.text):
 			if "赢了" in msg.text:
 				self.Win = True
 			else:
 				self.Win = False
-			return True
+
+			self.owner.try_to(IdleState, sender, msg)
 
 		return False
