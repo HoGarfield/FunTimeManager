@@ -45,19 +45,19 @@ class StateBase:
 		if msg.text == "指令列表":
 			cmd = """
 			开始娱乐
-			停止娱乐
+			结束娱乐
 			"""
 			for study_type in self.config["study"]:
 				if type(self.config["study"][study_type]) == list:
 					cmd += f"""
 				开始{study_type}
-				{study_type}赢了
-				{study_type}输了
+				赢了{study_type}
+				输了{study_type}
 					"""
 				else:
 					cmd += f"""
 				开始{study_type}
-				停止{study_type}
+				结束{study_type}
 					"""
 
 			msg.user.send_msg(cmd)
@@ -97,6 +97,7 @@ class FunState(StateBase):
 		def stop_fun_tip():
 			FunState.RestTime = 0
 			user.send_msg("你已经没有娱乐时间了，请开始你的学习为你的娱乐时间充值！")
+			self.owner.try_to(IdleState, None, None)
 
 		self.WarningT = Timer(FunState.RestTime, stop_fun_tip)
 		self.WarningT.start()
@@ -128,7 +129,7 @@ class FunState(StateBase):
 	def text_reply(self, sender, msg):
 		super().text_reply(sender, msg)
 
-		if sender.NickName == "cmdr" and msg.text == "停止娱乐":
+		if sender.NickName == "cmdr" and msg.text == "结束娱乐":
 			self.owner.try_to(IdleState, sender, msg)
 		elif sender.NickName == "cmdr" and msg.text.startswith("开始"):
 			self.owner.try_to(StudyState, sender, msg)
@@ -176,7 +177,7 @@ class StudyState(StateBase):
 	def text_reply(self, sender, msg):
 		super().text_reply(sender, msg)
 
-		if self.StudyType is not None and msg.text == "停止" + self.StudyType:
+		if self.StudyType is not None and msg.text == "结束" + self.StudyType:
 			if self.StudyType == "围棋":
 				msg.user.send_msg("请发送围棋赢了或者围棋输了")
 			else:
