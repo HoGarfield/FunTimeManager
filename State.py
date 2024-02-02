@@ -66,10 +66,13 @@ class StateBase:
 		elif sender.NickName == "何garfield" and msg.text.startswith("重置娱乐时间"):
 			try:
 				FunState.set_fun_time(int(msg.text.split(" ")[1]) * 60)
-				FunState.StartFunTime = datetime.datetime.now()
 				msg.user.send_msg(f"重置娱乐时间成功，剩余时间为{math.floor(FunState.get_fun_time() / 60)}分")
+				self.on_reset_time()
 			except:
 				pass
+
+	def on_reset_time(self):
+		pass
 
 
 class IdleState(StateBase):
@@ -121,7 +124,8 @@ class FunState(StateBase):
 			if FunState.get_fun_time() > 0:
 				return True
 			else:
-				msg.user.send_msg(f"你已经过度娱乐，超出了{math.ceil(abs(FunState.get_fun_time()) / 60)}分，请开始你的学习！")
+				msg.user.send_msg(
+					f"你已经过度娱乐，超出了{math.ceil(abs(FunState.get_fun_time()) / 60)}分，请开始你的学习！")
 
 		return False
 
@@ -141,8 +145,20 @@ class FunState(StateBase):
 
 		if sender.NickName == "cmdr" and msg.text == "结束娱乐":
 			self.owner.try_to(IdleState, sender, msg)
+		elif sender.NickName == "cmdr" and msg.text == "开始娱乐":
+			if FunState.StartFunTime is not None and datetime.datetime.now().day != FunState.StartFunTime.day:
+				self.on_enter(msg.user)
 		elif sender.NickName == "cmdr" and msg.text.startswith("开始"):
 			self.owner.try_to(StudyState, sender, msg)
+
+	def on_reset_time(self):
+		super().on_reset_time()
+
+		if self.WarningT:
+			self.WarningT.cancel()
+
+		self.WarningT = Timer(FunState.get_fun_time(), self.WarningT.function)
+		self.WarningT.start()
 
 
 class StudyState(StateBase):
