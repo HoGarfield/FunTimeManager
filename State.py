@@ -22,6 +22,7 @@ class StateOwner:
 
 	def text_reply(self, msg):
 		if msg.user.NickName == "个个都是靓仔靓女":
+			msg.text = msg.text.strip()
 			sender = msg.user.search_member(userName=msg.ActualUserName)
 			print(msg.text, sender)
 
@@ -80,9 +81,9 @@ class IdleState(StateBase):
 	def text_reply(self, sender, msg):
 		super().text_reply(sender, msg)
 
-		if sender.NickName == "cmdr" and msg.text == "开始娱乐":
+		if msg.text == "开始娱乐":
 			self.owner.try_to(FunState, sender, msg)
-		elif sender.NickName == "cmdr" and msg.text.startswith("开始"):
+		elif msg.text.startswith("开始"):
 			self.owner.try_to(StudyState, sender, msg)
 
 
@@ -120,12 +121,11 @@ class FunState(StateBase):
 
 	@classmethod
 	def can_switch_to(cls, sender, msg):
-		if sender.NickName == "cmdr":
-			if FunState.get_fun_time() > 0:
-				return True
-			else:
-				msg.user.send_msg(
-					f"你已经过度娱乐，超出了{math.ceil(abs(FunState.get_fun_time()) / 60)}分，请开始你的学习！")
+		if FunState.get_fun_time() > 0:
+			return True
+		else:
+			msg.user.send_msg(
+				f"你已经过度娱乐，超出了{math.ceil(abs(FunState.get_fun_time()) / 60)}分，请开始你的学习！")
 
 		return False
 
@@ -146,12 +146,13 @@ class FunState(StateBase):
 	def text_reply(self, sender, msg):
 		super().text_reply(sender, msg)
 
-		if sender.NickName == "cmdr" and msg.text == "结束娱乐":
+		if msg.text == "结束娱乐":
+		if msg.text == "结束娱乐":
 			self.owner.try_to(IdleState, sender, msg)
-		elif sender.NickName == "cmdr" and msg.text == "开始娱乐":
+		elif msg.text == "开始娱乐":
 			if FunState.StartFunTime is not None and datetime.datetime.now().day != FunState.StartFunTime.day:
 				self.on_enter(msg.user)
-		elif sender.NickName == "cmdr" and msg.text.startswith("开始"):
+		elif msg.text.startswith("开始"):
 			self.owner.try_to(StudyState, sender, msg)
 
 	def on_reset_time(self):
@@ -171,11 +172,10 @@ class StudyState(StateBase):
 
 	@classmethod
 	def can_switch_to(cls, sender, msg):
-		if sender.NickName == "cmdr":
-			action = msg.text[len("开始"):]
-			if action in config["study"]:
-				StudyState.StudyType = action
-				return True
+		action = msg.text[len("开始"):]
+		if action in config["study"]:
+			StudyState.StudyType = action
+			return True
 
 		return False
 
