@@ -147,7 +147,6 @@ class FunState(StateBase):
 		super().text_reply(sender, msg)
 
 		if msg.text == "结束娱乐":
-		if msg.text == "结束娱乐":
 			self.owner.try_to(IdleState, sender, msg)
 		elif msg.text == "开始娱乐":
 			if FunState.StartFunTime is not None and datetime.datetime.now().day != FunState.StartFunTime.day:
