@@ -88,7 +88,7 @@ class IdleState(StateBase):
 
 
 class FunState(StateBase):
-	RestTime = 0
+	RestTime = config["fun"] * 3600
 	StartFunTime = None
 	WarningT = None
 
