@@ -133,12 +133,9 @@ class FunState(StateBase):
 	def set_fun_time(rest_time):
 		FunState.RestTime = rest_time
 
-		if FunState.StartFunTime is not None and datetime.datetime.now().day != FunState.StartFunTime.day:
-			FunState.StartFunTime = None
-
 	@staticmethod
 	def get_fun_time():
-		if FunState.StartFunTime is not None and datetime.datetime.now().day != FunState.StartFunTime.day:
+		if FunState.RestTime <= 0 and FunState.StartFunTime is not None and datetime.datetime.now().day != FunState.StartFunTime.day:
 			FunState.RestTime = config["fun"] * 3600
 
 		return FunState.RestTime
