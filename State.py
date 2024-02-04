@@ -1,6 +1,7 @@
 import datetime
 import math
 import json
+import threading
 from threading import Timer
 
 with open("config.json", "r", encoding="utf-8") as f:
@@ -88,9 +89,10 @@ class IdleState(StateBase):
 
 
 class FunState(StateBase):
-	RestTime = config["fun"] * 3600
-	StartFunTime = None
-	WarningT = None
+	RestTime: int = config["fun"] * 3600
+	StartFunTime: datetime.datetime = None
+	WarningT: threading.Timer = None
+	ChargeTime: datetime.datetime = None
 
 	def on_enter(self, user):
 		super().on_enter(user)
@@ -101,7 +103,6 @@ class FunState(StateBase):
 			f"你的娱乐时间还剩余{math.floor(FunState.get_fun_time() / 60)}分钟，截止时间为{end_time.hour}:{end_time.minute}，请注意不要娱乐过度！")
 
 		def stop_fun_tip():
-			FunState.set_fun_time(0)
 			user.send_msg("你已经没有娱乐时间了，请开始你的学习为你的娱乐时间充值！")
 			self.owner.try_to(IdleState, None, None)
 
@@ -114,9 +115,9 @@ class FunState(StateBase):
 		self.WarningT.cancel()
 
 		FunState.set_fun_time(FunState.get_fun_time() - (datetime.datetime.now() - FunState.StartFunTime).seconds)
-		if FunState.get_fun_time() < 0:
-			user.send_msg(f"你已经过度娱乐，超出了{math.ceil(abs(FunState.get_fun_time()) / 60)}分，请开始你的学习！")
-		else:
+		FunState.StartFunTime = None
+
+		if user:
 			user.send_msg(f"你的娱乐时间剩余{math.floor(FunState.get_fun_time() / 60)}分")
 
 	@classmethod
@@ -131,11 +132,12 @@ class FunState(StateBase):
 
 	@staticmethod
 	def set_fun_time(rest_time):
-		FunState.RestTime = rest_time
+		FunState.RestTime = max(rest_time, 0)
 
 	@staticmethod
 	def get_fun_time():
-		if FunState.RestTime <= 0 and FunState.StartFunTime is not None and datetime.datetime.now().day != FunState.StartFunTime.day:
+		if FunState.ChargeTime is None or FunState.ChargeTime.day != datetime.datetime.now().day:
+			FunState.ChargeTime = datetime.datetime.now()
 			FunState.RestTime = config["fun"] * 3600
 
 		return FunState.RestTime
@@ -145,9 +147,6 @@ class FunState(StateBase):
 
 		if msg.text == "结束娱乐":
 			self.owner.try_to(IdleState, sender, msg)
-		elif msg.text == "开始娱乐":
-			if FunState.StartFunTime is not None and datetime.datetime.now().day != FunState.StartFunTime.day:
-				self.on_enter(msg.user)
 		elif msg.text.startswith("开始"):
 			self.owner.try_to(StudyState, sender, msg)
 
@@ -179,7 +178,6 @@ class StudyState(StateBase):
 		super().on_enter(user)
 
 		StudyState.StartTime = datetime.datetime.now()
-
 		user.send_msg("收到，开始统计学习时间")
 
 	def on_exit(self, user):
@@ -197,7 +195,7 @@ class StudyState(StateBase):
 		charge_time = study_time * rate
 		FunState.set_fun_time(FunState.get_fun_time() + charge_time)
 		user.send_msg(
-			f"本次学习时长为{study_time}秒，倍率为{rate}，充值时间为{charge_time}秒，剩余娱乐时间为{math.floor(FunState.get_fun_time() / 60)}分钟")
+			f"本次学习时长为{math.floor(study_time / 60)}分，倍率为{rate}，充值时间为{math.floor(charge_time / 60)}分，剩余娱乐时间为{math.floor(FunState.get_fun_time() / 60)}分钟")
 
 	def text_reply(self, sender, msg):
 		super().text_reply(sender, msg)
