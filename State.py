@@ -68,6 +68,7 @@ class StateBase:
 		elif sender.NickName == "何garfield" and msg.text.startswith("重置娱乐时间"):
 			try:
 				FunState.set_fun_time(int(msg.text.split(" ")[1]) * 60)
+				FunState.ChargeTime = datetime.datetime.now()
 				msg.user.send_msg(f"重置娱乐时间成功，剩余时间为{math.floor(FunState.get_fun_time() / 60)}分")
 				self.on_reset_time()
 			except:
