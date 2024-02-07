@@ -122,6 +122,10 @@ class FunState(StateBase):
 
 	@classmethod
 	def can_switch_to(cls, sender, msg):
+		if FunState.ChargeTime is None or FunState.ChargeTime.day != datetime.datetime.now().day:
+			FunState.ChargeTime = datetime.datetime.now()
+			FunState.RestTime = config["fun"] * 3600
+
 		if FunState.get_fun_time() > 0:
 			return True
 		else:
@@ -136,10 +140,6 @@ class FunState(StateBase):
 
 	@staticmethod
 	def get_fun_time():
-		if FunState.ChargeTime is None or FunState.ChargeTime.day != datetime.datetime.now().day:
-			FunState.ChargeTime = datetime.datetime.now()
-			FunState.RestTime = config["fun"] * 3600
-
 		return FunState.RestTime
 
 	def text_reply(self, sender, msg):
