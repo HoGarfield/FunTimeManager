@@ -3,6 +3,7 @@ import math
 import json
 import threading
 from threading import Timer
+import holidays
 
 with open("config.json", "r", encoding="utf-8") as f:
 	config = json.load(f)
@@ -88,9 +89,16 @@ class IdleState(StateBase):
 		elif msg.text.startswith("开始"):
 			self.owner.try_to(StudyState, sender, msg)
 
+def get_max_fun_time() -> int:
+	now = datetime.datetime.now()
+	cn = holidays.China()
+	if now in cn:
+		return config["fun"]["holiday"]
+	else:
+		return config["fun"]["workday"]
 
 class FunState(StateBase):
-	RestTime: int = config["fun"] * 3600
+	RestTime: int = get_max_fun_time() * 3600
 	StartFunTime: datetime.datetime = None
 	WarningT: threading.Timer = None
 	ChargeTime: datetime.datetime = None
@@ -125,7 +133,7 @@ class FunState(StateBase):
 	def can_switch_to(cls, sender, msg):
 		if FunState.ChargeTime is None or FunState.ChargeTime.day != datetime.datetime.now().day:
 			FunState.ChargeTime = datetime.datetime.now()
-			FunState.RestTime = config["fun"] * 3600
+			FunState.RestTime = get_max_fun_time() * 3600
 
 		if FunState.get_fun_time() > 0:
 			return True
